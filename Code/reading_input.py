@@ -8,6 +8,7 @@ def normalize(x, min, max):
     return (x - min) / (max - min)
 
 
+
 # Reading file
 df = pd.read_csv('M3C.csv')
 
@@ -22,6 +23,9 @@ for index, row in finance_df.iterrows():
     max_value = max(row)
     min_value = min(row)
     normalized_row = row.apply(normalize, min=min_value, max=max_value)
+
+    # Replaces NaN's with the mean
+    normalized_row = normalized_row.fillna(normalized_row.mean())
 
     # PLotting one normalized row; just to visualize the data
     normalized_row.plot()
