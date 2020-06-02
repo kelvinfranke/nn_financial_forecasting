@@ -18,8 +18,10 @@ def random_noise():
 
 
 def NaN_replacements(last_value, mean_slope):
-    replacement = last_value + mean_slope + random_noise()
+    trend = random.uniform(-2,2)
+    replacement = last_value + trend*mean_slope + random_noise()
     return replacement
+
 
 # Reading file
 df = pd.read_csv('M3C.csv')
