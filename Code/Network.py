@@ -13,7 +13,7 @@ import matplotlib
 from matplotlib import pyplot
 import numpy
 import random
-import
+import ReadingInput
 
 def timeseries_to_supervised(data, lag=1):
 	df = DataFrame(data)
