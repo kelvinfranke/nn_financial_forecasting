@@ -74,6 +74,10 @@ for index, row in finance_df.iterrows():
     final_df[timeseries,:] = normalized_row
 
     # Plotting one normalized row; just to visualize the data
-    # normalized_row.plot()
-    # plt.show()
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+    ax.plot(np.linspace(0, len(final_df[timeseries,:]), len(final_df[timeseries,:])), final_df[timeseries
+                                                                             ,:])
+    plt.show()
+    
 print(np.shape(final_df))
