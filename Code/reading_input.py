@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,11 +11,15 @@ def normalize(x, min, max):
 
 
 # Function to create some random noise between start 0 and the 1 - mean to not get a value bigger than 1
-# Needs work, different method
+# Maybe changes this: - probability curve of the slope of the series. Uit deze distributie halen we waardes
 def random_noise():
-    noise = random.uniform(-0.10, 0.20)
+    noise = random.uniform(-0.10, 0.10)
     return noise
 
+
+def NaN_replacements(last_value, mean_slope):
+    replacement = last_value + mean_slope + random_noise()
+    return replacement
 
 # Reading file
 df = pd.read_csv('M3C.csv')
@@ -32,11 +37,34 @@ for index, row in finance_df.iterrows():
     max_value = max(row)
     min_value = min(row)
 
-    # Normalizing the row
-    normalized_row = row.apply(normalize, min=min_value, max=max_value)
+    final_series = row
 
+    # NaN vervangen met de vorige waarde + mean_Slope + random_noise
+    if row.hasnans:
+        number_of_NaNs = row.isna().sum()
+        # Index van de eerste NaN (column)
+        column_last_value = len(row) - number_of_NaNs
+        last_value = row.at[str(column_last_value)]
+
+        new_row = row.dropna()
+
+        filling_values = np.array([])
+        # Mean slope of the series
+        mean_slope = new_row.diff().mean()
+        while number_of_NaNs > 0:
+            replacement = NaN_replacements(last_value,mean_slope)
+            filling_values = np.append(filling_values,replacement)
+            number_of_NaNs -= 1
+            last_value = replacement
+        filling_series = pd.Series(filling_values)
+
+        final_series = pd.concat([new_row,filling_series], ignore_index=True)
+
+    # Normalizing the row
+    normalized_row = final_series.apply(normalize, min=min(final_series), max=max(final_series))
+    print(normalized_row)
     # Replacing NaN's with the mean with added random noise
-    normalized_row = normalized_row.fillna(normalized_row.mean() + random_noise())
+    # normalized_row = normalized_row.fillna(normalized_row.mean() + random_noise())
 
     # Adding the new normalized, filled row to the final dataframe
     final_df = final_df.append(normalized_row, ignore_index=True)
