@@ -16,12 +16,10 @@ def random_noise():
     noise = random.uniform(-0.10, 0.10)
     return noise
 
-
 def NaN_replacements(last_value, mean_slope):
     trend = random.uniform(-2,2)
     replacement = last_value + trend*mean_slope + random_noise()
     return replacement
-
 
 # Reading file
 df = pd.read_csv('M3C.csv')
@@ -32,15 +30,15 @@ finance_df = df.loc[df['Category'] == "FINANCE     "]
 # Subsetting only the timeseries; dropping every other column
 finance_df = finance_df.iloc[:, list(range(6, 53))]
 
-final_df = pd.DataFrame()
-
+final_df = np.zeros([59,47])
+timeseries = 0
 # Iterating through every row, applying the normalizing function
 for index, row in finance_df.iterrows():
     max_value = max(row)
     min_value = min(row)
-
+    timeseries += 1
     final_series = row
-
+    final_series = final_series.to_numpy()
     # NaN vervangen met de vorige waarde + mean_Slope + random_noise
     if row.hasnans:
         number_of_NaNs = row.isna().sum()
@@ -58,21 +56,24 @@ for index, row in finance_df.iterrows():
             filling_values = np.append(filling_values,replacement)
             number_of_NaNs -= 1
             last_value = replacement
-        filling_series = pd.Series(filling_values)
 
-        final_series = pd.concat([new_row,filling_series], ignore_index=True)
+        new_row = new_row.to_numpy()
+
+        final_series = np.concatenate((new_row,filling_values))
+    print(final_series)
 
     # Normalizing the row
-    normalized_row = final_series.apply(normalize, min=min(final_series), max=max(final_series))
+    normalized_row = normalize(final_series,min(final_series),max(final_series))
     print(normalized_row)
-    # Replacing NaN's with the mean with added random noise
-    # normalized_row = normalized_row.fillna(normalized_row.mean() + random_noise())
 
-    # Adding the new normalized, filled row to the final dataframe
-    final_df = final_df.append(normalized_row, ignore_index=True)
+    # Adding the new normalized, filled row to the final dataframe (PANDAS)
+    #final_df = final_df.append(normalized_row, ignore_index=True)
+
+
+    # Adding the new normalized, filled row to the final dataframe (NUMPY)
+    final_df[timeseries,:] = normalized_row
 
     # Plotting one normalized row; just to visualize the data
     # normalized_row.plot()
     # plt.show()
-
-print(final_df)
+print(np.shape(final_df))
