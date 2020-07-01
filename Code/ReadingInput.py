@@ -60,19 +60,21 @@ class ReadingInput:
               new_row = new_row.to_numpy()
 
               final_series = np.concatenate((new_row,filling_values))
-          print(final_series)
+          # print(final_series)
 
           # Normalizing the row
           normalized_row = self.normalize(final_series,min(final_series),max(final_series))
-          print(normalized_row)
+          # print(normalized_row)
 
           # Adding the new normalized, filled row to the final dataframe (PANDAS)
           #final_df = final_df.append(normalized_row, ignore_index=True)
 
           # Adding the new normalized, filled row to the final dataframe (NUMPY)
           final_df[timeseries,:] = normalized_row
-          self.plot(final_df, timeseries)
-          print(np.shape(final_df))
+          # self.plot(final_df, timeseries)
+          # print(len(final_df))
+          # print(np.shape(final_df))
+      return final_df
 
 
   def plot(self, final_df, timeseries):
