@@ -71,13 +71,13 @@ y = np.array(y)
 
 # define model
 model = Sequential()
-model.add(Dense(17, activation='relu', input_dim=14))
+model.add(Dense(13, activation='relu', input_dim=14))
 model.add(Dense(6))
 model.compile(optimizer='adam', loss='mse')
 
 
 
-history = model.fit(X, y, epochs=500, batch_size=2, verbose=0, shuffle=True)
+history = model.fit(X, y, epochs=6000, batch_size=32, verbose=1, shuffle=True, validation_split=0.2)
 
 # demonstrate prediction
 x_input = array([0.00000000e+00, 8.12702417e-04, 4.85195473e-05, 4.64574666e-03,
