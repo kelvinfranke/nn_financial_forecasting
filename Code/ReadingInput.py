@@ -33,7 +33,7 @@ class ReadingInput:
         finance_df = finance_df.iloc[:, list(range(6, 27))]
 
         # final_df = np.zeros([59, 46])
-        final_df = np.zeros([146, 20])
+        final_df = np.zeros([147, 20])
         timeseries = 0
         # Iterating through every row, applying the normalizing function
         for index, row in finance_df.iterrows():
@@ -70,8 +70,8 @@ class ReadingInput:
 
             # Adding the new normalized, filled row to the final dataframe (NUMPY)
             final_df[timeseries, :] = detrended_row
-            self.plot(final_df, timeseries)
-            return(final_df)
+            # self.plot(final_df, timeseries)
+        return(final_df)
 
     def plot(self, final_df, timeseries):
         # Plotting one normalized row; just to visualize the data

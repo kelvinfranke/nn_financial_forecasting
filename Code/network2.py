@@ -41,46 +41,50 @@ from tensorflow.python.keras.models import Sequential
 # 	return array(X), array(y)
 
 
-# split a univariate sequence into samples
-def split_sequence(sequence, n_steps):
-  X, y = list(), list()
-  X.append(sequence[:41])
-  y.append(sequence[-6:])
-  return array(X), array(y)
+
 
 
 reading_input = ReadingInput()
 data = reading_input.process_data()
-raw_seq = data[2,:] 
+# print("data")
+# print(data)
+  
+X, y = list(), list()
+for j in range(0, 146):
+  sequence = data[j,:]
+  X.append(sequence[:14])
+  y.append(sequence[-6:])
+
+# print(total_input)
+
+# raw_seq = data[2,:] 
 # choose a number of time steps
-n_steps = 41
+# n_steps = 14
 # split into samples
-X, y = split_sequence(raw_seq, n_steps)
+# X, y = split_sequence(raw_seq, n_steps)
 # summarize the data
-# for i in range(len(X)):
-# 	print(X[i], y[i])
+for i in range(len(X)):
+	print(X[i], y[i])
 	
+X = np.array(X)
+y = np.array(y)
+
 # define model
 model = Sequential()
-model.add(Dense(17, activation='relu', input_dim=41))
+model.add(Dense(17, activation='relu', input_dim=14))
 model.add(Dense(6))
 model.compile(optimizer='adam', loss='mse')
 
-history = model.fit(X, y, epochs=500, verbose=0, batch_size=1, shuffle=True, validation_split=0.8)
+
+
+history = model.fit(X, y, epochs=500, batch_size=2, verbose=0, shuffle=True)
 
 # demonstrate prediction
 x_input = array([0.00000000e+00, 8.12702417e-04, 4.85195473e-05, 4.64574666e-03,
   3.78452469e-03, 1.85587268e-03, 1.94078189e-03, 6.30754115e-03,
   8.95185648e-03, 7.39923097e-03, 7.22941255e-03, 1.00920658e-02,
-  1.37189020e-02, 1.10988464e-02, 1.86315062e-02, 1.44345653e-02,
-  1.65451656e-02, 1.90560522e-02, 2.56304509e-02, 3.29205129e-02,
-  4.88834439e-02, 5.86843925e-02, 5.44389321e-02, 4.93079900e-02,
-  6.60108441e-02, 7.07900195e-02, 6.36697760e-02, 5.30318652e-02,
-  6.98438884e-02, 7.95963174e-02, 7.94386288e-02, 1.09290280e-01,
-  1.25859706e-01, 1.82093861e-01, 1.87236933e-01, 2.66129717e-01,
-  3.59918002e-01, 3.63617617e-01, 4.43614221e-01, 5.80584903e-01,
-  7.67785447e-01])
-x_input = x_input.reshape((1, 41))
+  1.37189020e-02, 1.10988464e-02])
+x_input = x_input.reshape((1, 14))
 yhat = model.predict(x_input, verbose=0)
 
 print("yhat")
