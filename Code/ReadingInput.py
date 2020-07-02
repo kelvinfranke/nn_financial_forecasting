@@ -23,8 +23,8 @@ class ReadingInput:
         replacement = last_value + trend * mean_slope + self.random_noise()
         if replacement > 1:
             return 1
-        if replacement < 0:
-            return 0
+        if replacement < -1:
+            return -1
         return replacement
 
     def process_data(self):
