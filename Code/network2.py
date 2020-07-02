@@ -52,8 +52,8 @@ data = reading_input.process_data()
 X, y = list(), list()
 for j in range(0, 146):
   sequence = data[j,:]
-  X.append(sequence[:14])
-  y.append(sequence[-6:])
+  X.append(sequence[:8])
+  y.append(sequence[9:15])
 
 # print(total_input)
 
@@ -71,20 +71,18 @@ y = np.array(y)
 
 # define model
 model = Sequential()
-model.add(Dense(13, activation='relu', input_dim=14))
+model.add(Dense(13, activation='relu', input_dim=8))
 model.add(Dense(6))
 model.compile(optimizer='adam', loss='mse')
 
 
 
-history = model.fit(X, y, epochs=6000, batch_size=32, verbose=1, shuffle=True, validation_split=0.2)
+history = model.fit(X, y, epochs=10, batch_size=64, verbose=1, shuffle=True)
 
 # demonstrate prediction
 x_input = array([0.00000000e+00, 8.12702417e-04, 4.85195473e-05, 4.64574666e-03,
-  3.78452469e-03, 1.85587268e-03, 1.94078189e-03, 6.30754115e-03,
-  8.95185648e-03, 7.39923097e-03, 7.22941255e-03, 1.00920658e-02,
-  1.37189020e-02, 1.10988464e-02])
-x_input = x_input.reshape((1, 14))
+  3.78452469e-03, 1.85587268e-03, 1.94078189e-03, 6.30754115e-03])
+x_input = x_input.reshape((1, 8))
 yhat = model.predict(x_input, verbose=0)
 
 print("yhat")
