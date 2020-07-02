@@ -48,7 +48,7 @@ class ReadingInput:
 
         # Subsetting only the ti  print(np.shape(final_df))meseries; dropping every other column
         # finance_df = finance_df.iloc[:, list(range(6, 53))]
-        finance_df = finance_df.iloc[:, list(range(6, 27))]
+        finance_df = finance_df.iloc[:, list(range(6, 26))]
 
         # final_df = np.zeros([59, 46])
         final_df = np.zeros([147, 19])
