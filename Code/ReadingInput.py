@@ -9,6 +9,9 @@ class ReadingInput:
     def normalize(self, x, min, max):
         return (x - min) / (max - min)
 
+    def reverse_normalize(self, x, min, max):
+        return (x * (max - min)) + min
+
     # Function to create some random noise between start 0 and the 1 - mean to not get a value bigger than 1
     # Maybe changes this: - probability curve of the slope of the series. Uit deze distributie halen we waardes
     def random_noise(self):
@@ -18,6 +21,10 @@ class ReadingInput:
     def NaN_replacements(self, last_value, mean_slope):
         trend = random.uniform(-2, 2)
         replacement = last_value + trend * mean_slope + self.random_noise()
+        if replacement > 1:
+            return 1
+        if replacement < 0:
+            return 0
         return replacement
 
     def process_data(self):
