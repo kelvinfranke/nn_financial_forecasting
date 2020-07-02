@@ -51,7 +51,7 @@ class ReadingInput:
         finance_df = finance_df.iloc[:, list(range(6, 27))]
 
         # final_df = np.zeros([59, 46])
-        final_df = np.zeros([147, 20])
+        final_df = np.zeros([147, 19])
         timeseries = 0
         # Iterating through every row, applying the normalizing function
         for index, row in finance_df.iterrows():
