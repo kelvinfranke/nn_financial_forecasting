@@ -40,10 +40,6 @@ from tensorflow.python.keras.models import Sequential
 # 		y.append(seq_y)
 # 	return array(X), array(y)
 
-
-
-
-
 reading_input = ReadingInput()
 data = reading_input.process_data()
 # print("data")
@@ -55,6 +51,12 @@ for j in range(0, 146):
   X.append(sequence[:8])
   y.append(sequence[9:15])
 
+X_val, y_val = list(), list()
+for i in range (0, 146):
+  sequence = data[i,:]
+  X_val.append(sequence[7:15])
+  y_val.append(sequence[-6:])
+
 # print(total_input)
 
 # raw_seq = data[2,:] 
@@ -63,30 +65,37 @@ for j in range(0, 146):
 # split into samples
 # X, y = split_sequence(raw_seq, n_steps)
 # summarize the data
-for i in range(len(X)):
-	print(X[i], y[i])
+# for i in range(len(X)):
+# 	print(X[i], y[i])
 	
 X = np.array(X)
 y = np.array(y)
+
+X_val = np.array(X_val)
+y_val = np.array(y_val)
 
 # define model
 model = Sequential()
 model.add(Dense(13, activation='relu', input_dim=8))
 model.add(Dense(6))
-model.compile(optimizer='adam', loss='mse')
+model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
 
+history = model.fit(X, y, epochs=1000, batch_size=64, verbose=1, shuffle=True) #validation_data=(X_val, y_val)
 
+# # demonstrate prediction
+# x_input = array([0.00000000e+00, 8.12702417e-04, 4.85195473e-05, 4.64574666e-03,
+#   3.78452469e-03, 1.85587268e-03, 1.94078189e-03, 6.30754115e-03])
+# x_input = x_input.reshape((1, 8))
+# yhat = model.predict(x_input, verbose=1)
 
-history = model.fit(X, y, epochs=10, batch_size=64, verbose=1, shuffle=True)
+# print("yhat")
+# print(yhat)
+print("Evaluate model on test data")
+results = model.evaluate(X_val, y_val, batch_size=64)
+# print("test loss, test acc:", results)
 
-# demonstrate prediction
-x_input = array([0.00000000e+00, 8.12702417e-04, 4.85195473e-05, 4.64574666e-03,
-  3.78452469e-03, 1.85587268e-03, 1.94078189e-03, 6.30754115e-03])
-x_input = x_input.reshape((1, 8))
-yhat = model.predict(x_input, verbose=0)
+print(results)
 
-print("yhat")
-print(yhat)
 
 plt.figure() 
 plt.plot(history.history['loss']) 
