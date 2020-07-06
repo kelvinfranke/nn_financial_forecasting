@@ -24,26 +24,16 @@ from keras.optimizers import Adam
 import matplotlib.pylab as plt
 from tensorflow.python.keras.layers import Input, Dense
 from tensorflow.python.keras.models import Sequential
-
-# # split a univariate sequence into samples
-# def split_sequence(sequence, n_steps):
-# 	X, y = list(), list()
-# 	for i in range(len(sequence)):
-# 		# find the end of this pattern
-# 		end_ix = i + n_steps
-# 		# check if we are beyond the sequence
-# 		if end_ix > len(sequence)-1:
-# 			break
-# 		# gather input and output parts of the pattern
-# 		seq_x, seq_y = sequence[i:end_ix], sequence[end_ix]
-# 		X.append(seq_x)
-# 		y.append(seq_y)
-# 	return array(X), array(y)
+from sklearn.model_selection import KFold, cross_val_score
+from keras.layers import LeakyReLU
+from tensorflow.keras import regularizers
+from sklearn.model_selection import train_test_split
+import tensorflow as tf
+from keras import backend as K
+import sys
 
 reading_input = ReadingInput()
 data = reading_input.process_data()
-# print("data")
-# print(data)
   
 X, y = list(), list()
 for j in range(0, 146):
@@ -51,22 +41,13 @@ for j in range(0, 146):
   X.append(sequence[:8])
   y.append(sequence[9:15])
 
+# X, y, X_cross_val, y_cross_val = train_test_split(X, y, test_size = 0.33, random_state = 42)
+
 X_val, y_val = list(), list()
 for i in range (0, 146):
   sequence = data[i,:]
   X_val.append(sequence[7:15])
   y_val.append(sequence[-6:])
-
-# print(total_input)
-
-# raw_seq = data[2,:] 
-# choose a number of time steps
-# n_steps = 14
-# split into samples
-# X, y = split_sequence(raw_seq, n_steps)
-# summarize the data
-# for i in range(len(X)):
-# 	print(X[i], y[i])
 	
 X = np.array(X)
 y = np.array(y)
@@ -74,71 +55,111 @@ y = np.array(y)
 X_val = np.array(X_val)
 y_val = np.array(y_val)
 
-# define model
-model = Sequential()
-model.add(Dense(13, activation='relu', input_dim=8))
-model.add(Dense(6))
-model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+random_indices = np.arange(0, 143, 1).tolist()
+np.random.shuffle(random_indices)
 
-history = model.fit(X, y, epochs=1000, batch_size=64, verbose=1, shuffle=True) #validation_data=(X_val, y_val)
+# voert k-fold cross validation uit
+def kfold_procedure(X, y, model):
+  k_fold = KFold(n_splits = 12)
+  total_test = []
+  save = 1
+  best = -99999
+  top_model = 0
+  avg_acc = 0
+  for train_indices, test_indices in k_fold.split(X):
+    # print(train_indices)
+    X_matrix = []
+    y_matrix = []
+    for i in train_indices:
+      X_matrix.append(X[i])
+    for i in train_indices:
+      y_matrix.append(y[i])
+    X_matrix = np.array(X_matrix)
+    y_matrix = np.array(y_matrix)
+    # print(np.shape(X_matrix))
+    # print(np.shape(y_matrix))
+    history = model.fit(X_matrix, y_matrix, epochs=100, verbose=0, shuffle=False)
+    X_test = []
+    y_test = []
+    for i in test_indices:
+      X_test.append(X[i])
+    for i in test_indices:
+      y_test.append(y[i])
+    X_test = np.array(X_test)
+    y_test = np.array(y_test)
+    results = model.evaluate(X_test, y_test, verbose=0)
+    total_test.append(results)
+    if results[1] > best:
+      best = results[1]
+      top_model = save
+    avg_acc += results[1]
+    # model.save('model' + str(save))
+    save += 1
+    # print(train_indices, test_indices)
+  # print(total_test)
+  print("Best model index: " + str(top_model))
+  return avg_acc/12
 
-# # demonstrate prediction
-# x_input = array([0.00000000e+00, 8.12702417e-04, 4.85195473e-05, 4.64574666e-03,
-#   3.78452469e-03, 1.85587268e-03, 1.94078189e-03, 6.30754115e-03])
-# x_input = x_input.reshape((1, 8))
-# yhat = model.predict(x_input, verbose=1)
 
-# print("yhat")
-# print(yhat)
-print("Evaluate model on test data")
-results = model.evaluate(X_val, y_val, batch_size=64)
+# Dit stukkie veranderd de hoeveelheid neurons in het model en het gebruikt die kfold_procedure functie om de avg accuracy te berekenen
+def model_finder():
+  acc = -99999
+  flag = 0
+  for j in range(8, 20):
+    model = Sequential()
+    model.add(Dense(j, activation='relu', kernel_regularizer=regularizers.l2(0.01), input_dim=8))
+    model.add(Dense(6))
+    model.compile(optimizer='adam', loss='mse', metrics=['accuracy'])
+    calc_acc = kfold_procedure(X, y, model)
+    print("calc_acc = " + str(calc_acc))
+    print("acc = " + str(acc))
+    # if j == 3:
+    #   calc_acc = -10
+    if calc_acc > acc:
+      if flag == 1:
+        flag = 0
+      acc = calc_acc
+    else:
+      if flag == 1:
+        print("Best accuracy: " + str(acc))
+        print("Best L: " + str(j))
+        return model
+        exit(0)
+      flag = 1
+      print("FLAG SET AT ITERATION: " + str(j))
+    K.clear_session()
+    del model
+  print("Best accuracy: " + str(acc))
+  print("bigger is better")
+  return model
+
+model = tf.keras.models.load_model('model')
+
+# uncomment dit als je nieuwe model wil fitten (en de oude overwriten)
+# model = model_finder()
+# model.evaluate(X_val, y_val, verbose=1)
+# model.save('model')
+
+# demonstrate prediction
+yhat = model.predict(X_val, verbose=1)
+yhat = np.array(yhat)
+print("yhat")
+print(yhat)
+
 # print("test loss, test acc:", results)
-
-print(results)
-
-
-plt.figure() 
-plt.plot(history.history['loss']) 
-plt.plot(history.history['val_loss']) 
-plt.title('model loss') 
-plt.ylabel('loss') 
-plt.xlabel('epoch') 
-plt.legend(['train', 'test'], loc='best') 
-plt.show() 
-plt.figure() 
-plt.plot(history.history['acc']) 
-plt.plot(history.history['val_acc']) 
-plt.title('model accuracy') 
-plt.ylabel('acc') 
-plt.xlabel('epoch') 
-plt.legend(['train', 'test'], loc='best') 
-plt.show()
-
-# [0.63146978 0.65216337 0.64123434 0.6981599  0.78877015 1.        ]
-
-# train_start = 0
-# n = 47
-# train_end = int(np.floor(0.8*n))
-# test_start = train_end
-# test_end = n
-# data_train = data[np.arange(train_start, train_end), :]
-# data_test = data[np.arange(test_start, test_end), :]
-
-
-# X_train = data_train[:, 1:]
-# print(X_train)
-# y_train = data_train[:, 0]
-# print(y_train)
-# X_test = data_test[:, 1:]
-# y_test = data_test[:, 0]
-
-# model = Sequential() 
-# model.add(Dense(64, input_dim=30)) 
-# model.add(BatchNormalization()) 
-# model.add(LeakyReLU()) 
-# model.add(Dense(2)) 
-# model.add(Activation('softmax'))
-
-# reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.9, patience=5, min_lr=0.000001, verbose=1) 
-# opt = Adam(learning_rate=0.0001)
-# model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+# plt.figure() 
+# plt.plot(history.history['loss']) 
+# plt.plot(history.history['val_loss']) 
+# plt.title('model loss') 
+# plt.ylabel('loss') 
+# plt.xlabel('epoch') 
+# plt.legend(['train', 'test'], loc='best') 
+# plt.show() 
+# plt.figure() 
+# plt.plot(history.history['acc']) 
+# plt.plot(history.history['val_acc']) 
+# plt.title('model accuracy') 
+# plt.ylabel('acc') 
+# plt.xlabel('epoch') 
+# plt.legend(['train', 'test'], loc='best') 
+# plt.show()
