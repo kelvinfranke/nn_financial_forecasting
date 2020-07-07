@@ -53,7 +53,10 @@ class ReadingInput:
         # final_df = np.zeros([59, 46])
         final_df = np.zeros([147, 19])
         timeseries = 0
+
         # Iterating through every row, applying the normalizing function
+        max_arr = np.array([])
+        min_arr = np.array([])
         for index, row in finance_df.iterrows():
             timeseries += 1
             final_series = row
@@ -66,13 +69,14 @@ class ReadingInput:
             # Averaging
             averaged_row = self.averager(detrended_row)
             # Length = 19
-
+            max_arr = np.append(max_arr, max(detrended_row))
+            min_arr = np.append(min_arr, min(detrended_row))
             normalized_row = self.normalize(detrended_row, min(detrended_row), max(detrended_row))
             normalized_averaged_row = self.normalize(averaged_row, min(averaged_row), max(averaged_row))
 
             final_df[timeseries, :] = normalized_row
             #self.plot(final_df, timeseries)
-        return(final_df)
+        return final_df, max_arr, min_arr
 
     def plot(self, final_df, timeseries):
         # Plotting one normalized row; just to visualize the data
