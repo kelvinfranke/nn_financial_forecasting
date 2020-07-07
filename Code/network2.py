@@ -33,21 +33,26 @@ from keras import backend as K
 import sys
 
 reading_input = ReadingInput()
+<<<<<<< HEAD
 
 data, max_arr, min_arr = reading_input.process_data()
+=======
+# Ik heb de functie uitgebreid zodat ie de max en de min van elke array onthoudt
+data, max_arr, min_arr, original = reading_input.process_data()
+>>>>>>> 757cb16246727e04e78e6dc81ec4cdd26b86c2d3
 
 X, y = list(), list()
 for j in range(0, 146):
-  sequence = data[j,:]
-  X.append(sequence[:8])
-  y.append(sequence[9:15])
+    sequence = data[j, :]
+    X.append(sequence[:8])
+    y.append(sequence[9:15])
 
 X_val, y_val = list(), list()
-for i in range (0, 146):
-  sequence = data[i,:]
-  X_val.append(sequence[7:15])
-  y_val.append(sequence[-6:])
-	
+for i in range(0, 146):
+    sequence = data[i, :]
+    X_val.append(sequence[7:15])
+    y_val.append(sequence[-6:])
+
 X = np.array(X)
 y = np.array(y)
 
@@ -141,6 +146,11 @@ yhat = np.array(yhat)
 
 # This reverts the normalizing
 for i in range(np.shape(yhat)[0]):
-  yhat[i,:] = reading_input.reverse_normalize(yhat[i,:], min_arr[i], max_arr[i])
+    yhat[i, :] = reading_input.reverse_normalize(yhat[i, :], min_arr[i], max_arr[i])
+
+start_index = 12
+end_index = 18
+actual = original[:,start_index: end_index]
+actual = np.delete(actual, 0, axis=0)
 
 print(yhat)
