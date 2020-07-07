@@ -13,7 +13,6 @@ class ReadingInput:
         return (x * (max - min)) + min
 
     # Function to create some random noise between start 0 and the 1 - mean to not get a value bigger than 1
-    # Maybe changes this: - probability curve of the slope of the series. Uit deze distributie halen we waardes
     def random_noise(self):
         noise = random.uniform(-0.10, 0.10)
         return noise
