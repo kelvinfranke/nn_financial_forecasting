@@ -149,6 +149,18 @@ yhat = np.array(yhat)
 for i in range(np.shape(yhat)[0]):
   yhat[i,:] = reading_input.reverse_normalize(yhat[i,:], min_arr[i], max_arr[i])
 
+start_index = 12
+end_index = 18
+actual = data[:,start_index: end_index]
+index = 1
+number = 0
+mean_sMAPE = 0
+while index < len(yhat):
+    number+=1
+    percentage = reading_input.sMAPE(actual[index],yhat[index])
+    mean_sMAPE = (mean_sMAPE + percentage) / number
+    index+=1
+print(mean_sMAPE)
 print(yhat)
 # print("test loss, test acc:", results)
 # plt.figure() 
