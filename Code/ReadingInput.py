@@ -26,7 +26,7 @@ class ReadingInput:
         if replacement < -1:
             return -1
         return replacement
-    
+
     # Exponential moving averager
     def averager(self, row):
         days = 14
@@ -34,7 +34,7 @@ class ReadingInput:
         averaged_row = np.array([])
         new_value = 0
         for value in row:
-            new_value = (value * (smoothing/(1+days))) + new_value*(1-(smoothing/(1+days)))
+            new_value = (value * (smoothing / (1 + days))) + new_value * (1 - (smoothing / (1 + days)))
             averaged_row = np.append(averaged_row, [new_value])
         return averaged_row
 
@@ -62,6 +62,7 @@ class ReadingInput:
             final_series = row
             # Length = 20
             final_series = final_series.to_numpy()
+
             # Detrending
             detrended_row = np.diff(final_series)
             # Length = 19
@@ -75,8 +76,8 @@ class ReadingInput:
             normalized_averaged_row = self.normalize(averaged_row, min(averaged_row), max(averaged_row))
 
             final_df[timeseries, :] = normalized_row
-            #self.plot(final_df, timeseries)
-        return final_df, max_arr, min_arr
+            # self.plot(final_df, timeseries)
+        return final_df, max_arr, min_arr, finance_df.to_numpy()
 
     def plot(self, final_df, timeseries):
         # Plotting one normalized row; just to visualize the data
@@ -84,8 +85,8 @@ class ReadingInput:
         ax = fig.add_subplot(1, 1, 1)
         ax.plot(np.linspace(0, len(final_df[timeseries, :]), len(final_df[timeseries, :])), final_df[timeseries, :])
         plt.show()
-        
-    
+
+
     # returns mean accuracy percentage error
     # sum( abs(X-F) / ( (X+F)/2 ) * 100 )
     def sMAPE(self, actual, forecast):
@@ -94,9 +95,9 @@ class ReadingInput:
         i = 0                                       # value to select either last or first of predicted values
         percentage = 0
         while i < 6:                                # condition that will stop after 6 values
-            percentage += abs(actual[i] - forecast[i]) / ( (actual[i] + forecast[i])/2 ) * 100
+            percentage += abs(actual[i] - forecast[i]) / ( abs(actual[i]) - abs(forecast[i]) )*100
             i+=1
-        return percentage
+        return percentage / 6
 
 
 if __name__ == "__main__":
