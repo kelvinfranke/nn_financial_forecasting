@@ -84,6 +84,19 @@ class ReadingInput:
         ax = fig.add_subplot(1, 1, 1)
         ax.plot(np.linspace(0, len(final_df[timeseries, :]), len(final_df[timeseries, :])), final_df[timeseries, :])
         plt.show()
+        
+    
+    # returns mean accuracy percentage error
+    # sum( abs(X-F) / ( (X+F)/2 ) * 100 )
+    def sMAPE(self, actual, forecast):
+        # F: last six values in predicted values
+        # X: last six values in actual values
+        i = 0                                       # value to select either last or first of predicted values
+        percentage = 0
+        while i < 6:                                # condition that will stop after 6 values
+            percentage += abs(actual[i] - forecast[i]) / ( (actual[i] + forecast[i])/2 ) * 100
+            i+=1
+        return percentage
 
 
 if __name__ == "__main__":
