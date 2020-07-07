@@ -33,8 +33,9 @@ from keras import backend as K
 import sys
 
 reading_input = ReadingInput()
-data = reading_input.process_data()
-  
+# Ik heb de functie uitgebreid zodat ie de max en de min van elke array onthoudt
+data, max_arr, min_arr = reading_input.process_data()
+
 X, y = list(), list()
 for j in range(0, 146):
   sequence = data[j,:]
@@ -143,9 +144,12 @@ model = tf.keras.models.load_model('model')
 # demonstrate prediction
 yhat = model.predict(X_val, verbose=1)
 yhat = np.array(yhat)
-print("yhat")
-print(yhat)
 
+# Hier draai ik het normalizeren terug
+for i in range(np.shape(yhat)[0]):
+  yhat[i,:] = reading_input.reverse_normalize(yhat[i,:], min_arr[i], max_arr[i])
+
+print(yhat)
 # print("test loss, test acc:", results)
 # plt.figure() 
 # plt.plot(history.history['loss']) 
